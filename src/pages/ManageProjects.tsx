@@ -4,12 +4,13 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Project } from '../types';
 import AdminProjectDetails from '../components/AdminProjectDetails';
+import { Navigate } from 'react-router-dom';
 
 export default function ManageProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -19,10 +20,14 @@ export default function ManageProjects() {
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/projects`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       setProjects(response.data);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Fetch error:', error.response?.data);
       toast.error('Failed to fetch projects');
     } finally {
       setLoading(false);
@@ -34,14 +39,23 @@ export default function ManageProjects() {
 
     try {
       await axios.delete(`${API_URL}/api/projects/${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       toast.success('Project deleted successfully');
       fetchProjects();
-    } catch (error) {
-      toast.error('Failed to delete project');
+    } catch (error: any) {
+      console.error('Delete error:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Failed to delete project');
     }
   };
+
+  // Only render if user is admin
+  if (user?.role !== 'admin') {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div className="space-y-6">
@@ -113,6 +127,7 @@ export default function ManageProjects() {
           project={selectedProject}
           isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
+          onDelete={handleDeleteProject}
         />
       )}
     </div>

@@ -18,16 +18,16 @@ export default function AdminLogin() {
         isAdmin: true 
       });
       
-      if (response.user.role === 'admin') {
-        toast.success('Admin login successful');
-        navigate('/admin');
-      } else {
+      if (response.user.role !== 'admin') {
         toast.error('Not authorized as admin');
-        navigate('/login');
+        return;
       }
+
+      toast.success('Admin login successful');
+      navigate('/admin');
     } catch (error: any) {
-      console.error('Admin login error:', error);
-      toast.error(error.message || 'Admin login failed');
+      console.error('Admin login error:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Admin login failed');
     }
   };
 

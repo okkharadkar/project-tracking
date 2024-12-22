@@ -2,14 +2,25 @@ import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { Project } from '../types';
+import { toast } from 'react-hot-toast';
 
 interface AdminProjectDetailsProps {
   project: Project;
   isOpen: boolean;
   onClose: () => void;
+  onDelete: (projectId: string) => Promise<void>;
 }
 
-export default function AdminProjectDetails({ project, isOpen, onClose }: AdminProjectDetailsProps) {
+export default function AdminProjectDetails({ project, isOpen, onClose, onDelete }: AdminProjectDetailsProps) {
+  const handleDelete = async () => {
+    try {
+      await onDelete(project._id);
+      onClose();
+    } catch (error) {
+      toast.error('Failed to delete project');
+    }
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/70" aria-hidden="true" />

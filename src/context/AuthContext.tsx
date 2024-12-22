@@ -2,22 +2,21 @@ import { createContext, useContext, useReducer, ReactNode } from 'react';
 import { AuthState, User, LoginCredentials, SignupCredentials } from '../types/auth';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Set default axios settings
-axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-// Add axios interceptor for token
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Add request interceptor
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // Add response interceptor for error handling
 axios.interceptors.response.use(
@@ -82,20 +81,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
       return { user, token };
     } catch (error: any) {
+      console.error('Login error:', error.response?.data || error.message);
       throw error;
     }
   };
 
   const signup = async (credentials: SignupCredentials) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signup`, credentials);
+      const response = await axios.post('/api/auth/signup', credentials);
       const { user, token } = response.data;
       
       localStorage.setItem('token', token);
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error: any) {
       console.error('Signup error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Signup failed');
+      throw error;
     }
   };
 
