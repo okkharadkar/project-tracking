@@ -10,7 +10,6 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import ManageProjects from './pages/ManageProjects';
 import CreateProject from './pages/CreateProject';
-import { ApiTest } from './components/ApiTest';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -25,7 +24,6 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <AuthProvider>
-      <ApiTest />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />

@@ -7,13 +7,12 @@ import axios from 'axios';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const testBackendConnection = async () => {
     try {
-      const response = await axios.get('https://project-tracking-backend.onrender.com/');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/`);
       console.log('Backend connection successful:', response.data);
     } catch (error) {
       console.error('Backend connection failed:', error);
@@ -24,39 +23,18 @@ export default function Login() {
     testBackendConnection();
   }, []);
 
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/test`);
-        console.log('API Test Response:', response.data);
-      } catch (error) {
-        console.error('API Test Error:', error);
-      }
-    };
-    testConnection();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
     try {
-      console.log('Attempting login with:', { email });
       await login({ 
         email, 
         password,
         isAdmin: false
       });
-      toast.success('Login successful!');
       navigate('/');
     } catch (error: any) {
-      console.error('Login error:', error);
-      toast.error(
-        error.response?.data?.message || 
-        'Failed to login. Please check your credentials.'
-      );
-    } finally {
-      setIsLoading(false);
+      console.error('Login error:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Failed to login');
     }
   };
 
@@ -115,10 +93,9 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              Sign in
             </button>
           </div>
         </form>
