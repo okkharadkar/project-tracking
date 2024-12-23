@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import ManageProjects from './pages/ManageProjects';
 import CreateProject from './pages/CreateProject';
+import { Toaster } from 'react-hot-toast';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -59,6 +60,16 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+        }}
+      />
     </AuthProvider>
   );
 }

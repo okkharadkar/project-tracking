@@ -6,11 +6,14 @@ import toast from 'react-hot-toast';
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const response = await login({ 
         email, 
@@ -19,15 +22,16 @@ export default function AdminLogin() {
       });
       
       if (response.user.role !== 'admin') {
-        toast.error('Not authorized as admin');
+        toast.error('This account does not have admin privileges');
         return;
       }
 
-      toast.success('Admin login successful');
       navigate('/admin');
-    } catch (error: any) {
-      console.error('Admin login error:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Admin login failed');
+    } catch (error) {
+      // Error is handled in AuthContext
+      console.error('Admin login failed:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -60,6 +64,7 @@ export default function AdminLogin() {
                 placeholder="Admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -75,6 +80,7 @@ export default function AdminLogin() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -82,9 +88,10 @@ export default function AdminLogin() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              disabled={isSubmitting}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in as Admin
+              {isSubmitting ? 'Signing in...' : 'Sign in as Admin'}
             </button>
           </div>
         </form>
