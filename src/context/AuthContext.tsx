@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
-import { AuthState, User, LoginCredentials, SignupCredentials } from '../types/auth';
+import { AuthState, User, LoginCredentials, SignupCredentials, AuthContextType } from '../types/auth';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 

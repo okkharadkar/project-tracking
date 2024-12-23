@@ -24,4 +24,10 @@ export interface LoginCredentials {
 
 export interface SignupCredentials extends LoginCredentials {
   name: string;
+}
+
+export interface AuthContextType extends AuthState {
+  login: (credentials: LoginCredentials) => Promise<{ user: User; token: string }>;
+  signup: (credentials: SignupCredentials) => Promise<void>;
+  logout: () => void;
 } 
