@@ -7,6 +7,7 @@ import WelcomeBanner from '../components/WelcomeBanner';
 import StatCard from '../components/StatCard';
 import { UserGroupIcon, DocumentCheckIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import ProgressTracker from '../components/ProgressTracker';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -17,7 +18,9 @@ export default function Dashboard() {
     pending: 0,
     inProgress: 0,
     completed: 0,
-    averageProgress: 0
+    averageProgress: 0,
+    totalScore: 0,
+    completionRate: 0
   });
   const [loading, setLoading] = useState(true);
   const { user, token } = useAuth();
@@ -168,6 +171,14 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {user?.candidateId && (
+        <ProgressTracker 
+          progress={projects}
+          totalScore={stats.totalScore || 0}
+          completionRate={stats.completionRate || 0}
+        />
+      )}
     </div>
   );
 } 

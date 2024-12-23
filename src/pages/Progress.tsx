@@ -6,6 +6,7 @@ import { Project } from '../types';
 
 export default function Progress() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, token } = useAuth();
   const API_URL = import.meta.env.VITE_API_URL;
@@ -22,7 +23,8 @@ export default function Progress() {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      setProjects(response.data.projects);
+      setProjects(response.data.myProjects);
+      setAvailableProjects(response.data.availableProjects);
     } catch (error) {
       console.error('Fetch error:', error);
       toast.error('Failed to fetch projects');
@@ -85,14 +87,12 @@ export default function Progress() {
 
   return (
     <div className="space-y-6">
-      {/* Pending Projects */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Available Projects</h2>
-        {loading ? (
-          <div>Loading...</div>
-        ) : pendingProjects.length > 0 ? (
+      {/* Available Projects - Moved to top */}
+      {availableProjects.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Available Projects</h2>
           <div className="space-y-4">
-            {pendingProjects.map((project) => (
+            {availableProjects.map((project) => (
               <div key={project._id} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start">
                   <div>
@@ -101,7 +101,7 @@ export default function Progress() {
                   </div>
                   <button
                     onClick={() => handleAcceptProject(project._id)}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                    className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
                   >
                     Accept Project
                   </button>
@@ -109,10 +109,8 @@ export default function Progress() {
               </div>
             ))}
           </div>
-        ) : (
-          <p>No available projects</p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* In Progress Projects */}
       <div className="bg-white rounded-lg shadow p-6">

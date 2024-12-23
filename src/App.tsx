@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -13,13 +13,29 @@ import CreateProject from './pages/CreateProject';
 import { Toaster } from 'react-hot-toast';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  const { isAuthenticated, token } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated && !token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated } = useAuth();
-  return isAuthenticated && user?.role === 'admin' ? children : <Navigate to="/login" />;
+  const { user, isAuthenticated, token } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated && !token) {
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  }
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }
 
 function App() {

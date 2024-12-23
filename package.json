@@ -26,9 +26,11 @@
     "vite": "^6.0.5"
   },
   "dependencies": {
+    "@types/react-circular-progressbar": "^1.1.0",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "react": "^19.0.0",
+    "react-circular-progressbar": "^2.1.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.4.1"
   }

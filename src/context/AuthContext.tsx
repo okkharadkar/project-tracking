@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { AuthState, User, LoginCredentials, SignupCredentials, AuthContextType } from '../types/auth';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -12,9 +12,9 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const initialState: AuthState = {
-  user: null,
+  user: JSON.parse(localStorage.getItem('user') || 'null'),
   token: localStorage.getItem('token'),
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('token'),
 };
 
 type AuthAction =
@@ -45,6 +45,44 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
+  useEffect(() => {
+    const restoreSession = async () => {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (token && storedUser) {
+        try {
+          // Set default auth header
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
+          const response = await axios.get(`${API_URL}/api/auth/user`);
+          dispatch({ 
+            type: 'LOGIN_SUCCESS', 
+            payload: { 
+              user: response.data.user, 
+              token 
+            } 
+          });
+        } catch (error) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          delete axios.defaults.headers.common['Authorization'];
+        }
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  // Update axios auth header whenever token changes
+  useEffect(() => {
+    if (state.token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  }, [state.token]);
+
   const login = async (credentials: LoginCredentials) => {
     try {
       const endpoint = credentials.isAdmin ? '/api/auth/admin/login' : '/api/auth/login';
@@ -55,12 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
+      // Set axios default header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
       // Update context
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
 
-      // Show success message
       toast.success(`Welcome back, ${user.name}!`);
-      
       return { user, token };
     } catch (error: any) {
       // Handle specific error cases
@@ -91,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
     dispatch({ type: 'LOGOUT' });
     toast.success('Logged out successfully');
   };
