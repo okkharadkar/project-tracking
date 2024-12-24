@@ -32,7 +32,7 @@ export default function ProgressTracker({ progress, totalScore, completionRate }
     <div className="bg-gray-800 rounded-lg p-6 shadow-xl">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-white">Progress Overview</h3>
-        <div className="text-primary-400">
+        <div className="text-green-500	">
           Score: {totalScore} points
         </div>
       </div>
